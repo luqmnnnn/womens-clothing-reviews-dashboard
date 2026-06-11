@@ -522,6 +522,20 @@ def build_inverted_index(tokens_list):
     return {k: sorted(list(v)) for k, v in inv.items()}
 
 
+@st.cache_data
+def calculate_silhouette_comparison(X_scaled):
+    scores = {}
+    n_samples = min(len(X_scaled), 5000)
+    indices = np.random.RandomState(42).choice(len(X_scaled), n_samples, replace=False)
+    X_sample = X_scaled[indices]
+    for k_val in [2, 3, 4, 5, 6]:
+        km = KMeans(n_clusters=k_val, random_state=42, n_init=10)
+        labels = km.fit_predict(X_sample)
+        scores[k_val] = silhouette_score(X_sample, labels)
+    return scores
+
+
+
 # ─────────────────────────────────────────────────────────────
 # SIDEBAR  — dark espresso, no emojis, minimal
 # ─────────────────────────────────────────────────────────────
@@ -932,6 +946,18 @@ elif page == "Clustering Analysis":
         X_scaled = scaler.fit_transform(X)
 
         st.markdown("### Elbow Method (Choose K)")
+        st.write(
+            "The **Elbow Method** helps identify the optimal number of clusters ($K$) "
+            "by plotting the number of clusters against the **Inertia** (Within-Cluster Sum of Squares). "
+            "As $K$ increases, inertia decreases because clusters become smaller and tighter. "
+            "The optimal $K$ is at the **elbow point**—the point where the rate of decrease "
+            "shifts from steep to shallow, indicating diminishing returns for adding more clusters."
+        )
+        st.write(
+            "Look for the 'elbow' bend in the plot below. This point indicates a good balance between "
+            "accuracy (low inertia) and model simplicity (fewer clusters)."
+        )
+
         inertia  = []
         for k_val in range(1, 11):
             km = KMeans(n_clusters=k_val, random_state=42, n_init=10)
@@ -985,8 +1011,19 @@ elif page == "Clustering Analysis":
             st.markdown(
                 f'<div class="metric-card" style="max-width:260px">'
                 f'<div class="num">{score:.4f}</div>'
-                f'<div class="lbl">Silhouette Score</div></div>',
+                f'<div class="lbl">Silhouette Score (K={k})</div></div>',
                 unsafe_allow_html=True,
+            )
+
+            # Display Silhouette Score Comparison
+            sil_scores = calculate_silhouette_comparison(X_scaled)
+            sil_df = pd.DataFrame(list(sil_scores.items()), columns=["Number of Clusters (K)", "Silhouette Score"])
+            
+            st.markdown("#### Silhouette Score Comparison Table")
+            st.dataframe(sil_df)
+            st.caption(
+                "Note: Silhouette comparison scores are calculated on a representative sample of 5,000 records "
+                "to ensure fast response times. Values closer to 1.0 indicate better cluster separation."
             )
 
             st.markdown("### Cluster Summary Table")
