@@ -623,10 +623,10 @@ if page == "Home":
 
     st.markdown("### About this Dashboard")
     st.write(
-        "You are a team of Data Analysts working for an e-commerce company. "
-        "This dashboard analyzes customer behavior, predicts recommendations, "
-        "discovers customer segments, simulates a review search engine, and "
-        "analyzes review sentiment using NLP techniques."
+        "This interactive dashboard provides a comprehensive analysis of the Women's E-Commerce Clothing Reviews dataset "
+        "by integrating advanced Data Mining and Information Retrieval techniques. The application processes raw customer feedback "
+        "and metrics to extract actionable business insights, predict customer recommendations, discover distinct consumer segments, "
+        "and enable real-time keyword search across reviews."
     )
 
     st.markdown("#### Methods & Techniques")
